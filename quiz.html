@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Take Quiz</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    #total-timer {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    #question-timer {
+      position: absolute;
+      top: 50px;
+      right: 30px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #ff5722;
+    }
+
+    .question-nav {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 1.2rem;
+      background-color: #f4f4f4;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      overflow-y: auto;
+      height: calc(100vh - 100px);
+    }
+
+    .question-nav button {
+      margin: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      background-color: #e0f7fa;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .question-nav button:hover {
+      background-color: #80deea;
+    }
+
+    .quiz-container {
+  margin-left: auto;  /* Automatically adjust left margin */
+  margin-right: auto; /* Center the container horizontally */
+  width: 40%;         /* Optional: Set a fixed width for the container */
+  max-width: 1200px;  /* Optional: Limit the max width of the container */
+  padding: 20px;      /* Optional: Add some padding */
+}
+li {
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ccc; /* Add a bottom border to each question item */
+  margin-bottom: 15px;
+}
+
+li:last-child {
+  border-bottom: none;  /* Remove the border from the last question */
+}
+
+
+
+    #question-box {
+      margin-top: 40px;
+      font-size: 1.3rem;
+      align-items: center;
+      font-weight: 500;
+    }
+
+    #answers {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .option-card {
+      background-color: #fff;
+      border: 2px solid #ddd;
+      border-radius: 30px;
+      padding: 15px 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, background-color 0.3s;
+      width: 80%;  /* Make cards responsive */
+      max-width: 500px; 
+    }
+
+    .option-card:hover {
+      background-color: #e3f2fd;
+      transform: translateY(-2px);
+    }
+
+    .option-card label {
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .option-card input[type="radio"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    #next-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #4caf50;
+      color: white;
+      transition: background-color 0.3s;
+    }
+
+    #next-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div id="total-timer">⏱️ Total Time: 300s</div>
+  <div id="question-timer">⏱️ Question Time: 30s</div>
+
+  <div class="quiz-container">
+    <h1>Quiz Time!</h1>
+    <div class="question-nav" id="question-nav"></div>
+
+    <div id="question-box">
+      <p id="question">Loading question...</p>
+    </div>
+
+    <div id="answers">
+      <!-- Example static options. Replace or generate dynamically in JS -->
+      <div class="option-card">
+        <label>
+          <input type="radio" name="answer" value="A" />
+          Option A
+        </label>
+      </div>
+      <div class="option-card">
+        <label>
+          <input type="radio" name="answer" value="B" />
+          Option B
+        </label>
+      </div>
+      <div class="option-card">
+        <label>
+          <input type="radio" name="answer" value="C" />
+          Option C
+        </label>
+      </div>
+      <div class="option-card">
+        <label>
+          <input type="radio" name="answer" value="D" />
+          Option D
+        </label>
+      </div>
+    </div>
+
+    <button id="next-btn">Next</button>
+  </div>
+
+  <script src="quiz.js"></script>
+</body>
+</html>

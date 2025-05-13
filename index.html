@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Home</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="home-container">
+    <h1>Welcome to the Quiz Game!</h1>
+    <button onclick="location.href='quiz.html'" class="btn">Start Quiz</button>
+
+    <h2>Quiz History</h2>
+    <div id="history-container"></div>
+  </div>
+
+  <script>
+  const historyContainer = document.getElementById('history-container');
+  let history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+
+  // Remove duplicates: keep only unique (score + time) entries
+  const uniqueHistory = [];
+  const seen = new Set();
+
+  history.forEach(entry => {
+    const key = `${entry.score}-${entry.time}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueHistory.push(entry);
+    }
+  });
+
+  // Save the cleaned-up version back to localStorage
+  localStorage.setItem('quizHistory', JSON.stringify(uniqueHistory));
+
+  // Display the history
+  uniqueHistory.forEach((entry, i) => {
+    const card = document.createElement('div');
+    card.className = 'history-card';
+    card.innerHTML = `
+      <strong>Attempt ${i + 1}</strong>
+      <p>Score: ${entry.score} / 20</p>
+      <p>Time: ${entry.time}</p>
+    `;
+    historyContainer.appendChild(card);
+  });
+</script>
+
+</body>
+</html>
