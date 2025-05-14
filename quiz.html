@@ -52,24 +52,27 @@
       background-color: #80deea;
     }
 
+    .question-nav button.attempted {
+      background-color: #c8e6c9 !important; /* Light green */
+    }
+
     .quiz-container {
-  margin-left: auto;  /* Automatically adjust left margin */
-  margin-right: auto; /* Center the container horizontally */
-  width: 40%;         /* Optional: Set a fixed width for the container */
-  max-width: 1200px;  /* Optional: Limit the max width of the container */
-  padding: 20px;      /* Optional: Add some padding */
-}
-li {
-  padding-bottom: 15px;
-  border-bottom: 1px solid #ccc; /* Add a bottom border to each question item */
-  margin-bottom: 15px;
-}
+      margin-left: auto; 
+      margin-right: auto; 
+      width: 40%;         
+      max-width: 1200px;  
+      padding: 20px;      
+    }
 
-li:last-child {
-  border-bottom: none;  /* Remove the border from the last question */
-}
+    li {
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ccc; 
+      margin-bottom: 15px;
+    }
 
-
+    li:last-child {
+      border-bottom: none; 
+    }
 
     #question-box {
       margin-top: 40px;
@@ -93,7 +96,7 @@ li:last-child {
       padding: 15px 20px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s, background-color 0.3s;
-      width: 80%;  /* Make cards responsive */
+      width: 80%;  
       max-width: 500px; 
     }
 
@@ -145,36 +148,194 @@ li:last-child {
     </div>
 
     <div id="answers">
-      <!-- Example static options. Replace or generate dynamically in JS -->
-      <div class="option-card">
-        <label>
-          <input type="radio" name="answer" value="A" />
-          Option A
-        </label>
-      </div>
-      <div class="option-card">
-        <label>
-          <input type="radio" name="answer" value="B" />
-          Option B
-        </label>
-      </div>
-      <div class="option-card">
-        <label>
-          <input type="radio" name="answer" value="C" />
-          Option C
-        </label>
-      </div>
-      <div class="option-card">
-        <label>
-          <input type="radio" name="answer" value="D" />
-          Option D
-        </label>
-      </div>
+      <!-- Dynamic Options will be injected here -->
     </div>
 
     <button id="next-btn">Next</button>
   </div>
 
-  <script src="quiz.js"></script>
+  <script>
+    const questionBox = document.getElementById('question');
+    const answersContainer = document.getElementById('answers');
+    const nextBtn = document.getElementById('next-btn');
+    const navContainer = document.getElementById('question-nav');
+
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let userAnswers = [];
+
+    let totalTime = 300;
+    let questionTime = 30;
+    let totalTimeInterval;
+    let questionTimeInterval;
+
+    fetch('https://opentdb.com/api.php?amount=20&type=multiple')
+      .then(res => res.json())
+      .then(data => {
+        questions = data.results.map(formatQuestion);
+        generateQuestionNav();
+        showQuestion();
+        startTotalTimer();
+        startQuestionTimer();
+      })
+      .catch(err => {
+        questionBox.textContent = 'Failed to load questions.';
+        console.error(err);
+      });
+
+    function formatQuestion(q) {
+      const correct = decodeHTML(q.correct_answer);
+      const incorrect = q.incorrect_answers.map(decodeHTML);
+      const options = shuffle([correct, ...incorrect]);
+      return {
+        question: decodeHTML(q.question),
+        correct,
+        options
+      };
+    }
+
+    function showQuestion() {
+      const current = questions[currentQuestionIndex];
+      questionBox.textContent = `Q${currentQuestionIndex + 1}: ${current.question}`;
+      answersContainer.innerHTML = '';
+
+      current.options.forEach(option => {
+        const card = document.createElement('div');
+        card.className = 'option-card';
+
+        const label = document.createElement('label');
+
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'answer';
+        input.value = option;
+
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(option));
+        card.appendChild(label);
+        answersContainer.appendChild(card);
+      });
+    }
+
+    nextBtn.addEventListener('click', () => {
+      const selected = document.querySelector('input[name="answer"]:checked');
+      if (!selected) {
+        alert('Please select an answer!');
+        return;
+      }
+
+      clearInterval(questionTimeInterval);
+
+      userAnswers[currentQuestionIndex] = {
+        question: questions[currentQuestionIndex].question,
+        selected: selected.value,
+        correct: questions[currentQuestionIndex].correct
+      };
+
+      updateNavButton(currentQuestionIndex); // Mark as attempted
+
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        showQuestion();
+        startQuestionTimer();
+      } else {
+        showResults();
+      }
+    });
+
+    function generateQuestionNav() {
+      navContainer.innerHTML = '';
+      questions.forEach((_, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = index + 1;
+        btn.id = `nav-btn-${index}`;
+        btn.addEventListener('click', () => {
+          currentQuestionIndex = index;
+          showQuestion();
+        });
+        navContainer.appendChild(btn);
+      });
+    }
+
+    function updateNavButton(index) {
+      const btn = document.getElementById(`nav-btn-${index}`);
+      btn.classList.add('attempted');
+    }
+
+    function showResults() {
+      let score = 0;
+      userAnswers.forEach(ans => {
+        if (ans.selected === ans.correct) score++;
+      });
+
+      document.querySelector('.quiz-container').innerHTML = `
+        <h1>Quiz Completed!</h1>
+        <p>Your Score: <strong>${score} / ${questions.length}</strong></p>
+        <ul>
+          ${userAnswers.map(ans => `
+            <li>
+              <strong>Q:</strong> ${ans.question}<br>
+              <strong>Your answer:</strong> ${ans.selected}<br>
+              <strong>Correct answer:</strong> ${ans.correct}
+              
+            </li>
+          `).join('')}
+        </ul>
+        <div style="margin-top: 20px; text-align: center;">
+          <button onclick="retryQuiz()" class="btn">Retry</button>
+          <button onclick="goHome()" class="btn">Home</button>
+        </div>
+      `;
+    }
+
+    function startTotalTimer() {
+      totalTimeInterval = setInterval(() => {
+        if (totalTime > 0) {
+          totalTime--;
+          document.getElementById('total-timer').textContent = `⏱️ Total Time: ${totalTime}s`;
+        } else {
+          clearInterval(totalTimeInterval);
+          alert('Time is up!');
+          showResults();
+        }
+      }, 1000);
+    }
+
+    function startQuestionTimer() {
+      questionTime = 30;
+      document.getElementById('question-timer').textContent = `⏱️ Question Time: ${questionTime}s`;
+      questionTimeInterval = setInterval(() => {
+        if (questionTime > 0) {
+          questionTime--;
+          document.getElementById('question-timer').textContent = `⏱️ Question Time: ${questionTime}s`;
+        } else {
+          clearInterval(questionTimeInterval);
+          alert('Time for this question is up!');
+          nextBtn.click(); // Auto-move to next
+        }
+      }, 1000);
+    }
+
+    function decodeHTML(str) {
+      const doc = new DOMParser().parseFromString(str, 'text/html');
+      return doc.documentElement.textContent;
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function retryQuiz() {
+      window.location.reload();
+    }
+
+    function goHome() {
+      window.location.href = '/';
+    }
+  </script>
 </body>
 </html>
