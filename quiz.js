@@ -2,6 +2,7 @@ const questionBox = document.getElementById('question');
 const answersContainer = document.getElementById('answers');
 const nextBtn = document.getElementById('next-btn');
 const navContainer = document.getElementById('question-nav');
+const endButtons = document.getElementById('end-buttons');
 
 let questions = [];
 let currentQuestionIndex = 0;
@@ -110,7 +111,16 @@ function showResults() {
     if (ans.selected === ans.correct) score++;
   });
 
-  document.querySelector('.quiz-container').innerHTML = `
+  // Save result to history in localStorage
+const quizResult = {
+  score: score,
+  time: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`
+};
+
+
+  
+
+  const resultHtml = `
     <h1>Quiz Completed!</h1>
     <p>Your Score: <strong>${score} / ${questions.length}</strong></p>
     <ul>
@@ -122,7 +132,13 @@ function showResults() {
         </li>
       `).join('')}
     </ul>
+    <div style="margin-top: 20px; text-align: center;">
+      <button onclick="retryQuiz()" class="btn">Retry</button>
+      <button onclick="goHome()" class="btn">Home</button>
+    </div>
   `;
+
+  document.querySelector('.quiz-container').innerHTML = resultHtml;
 }
 
 // Decode HTML entities
@@ -139,4 +155,14 @@ function shuffle(array) {
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
+}
+
+// Retry the quiz
+function retryQuiz() {
+  location.reload();
+}
+
+// Go to home page
+function goHome() {
+  window.location.href = 'index.html'; // Or wherever your home page is
 }
